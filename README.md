@@ -1,0 +1,2 @@
+# MOSACMO_WEBGIS
+WBGIS of teh MOSAICMO project
