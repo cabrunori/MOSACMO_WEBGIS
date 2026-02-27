@@ -227,15 +227,35 @@
         });
         var cluster_NODI_32 = new L.MarkerClusterGroup({showCoverageOnHover: false}).addLayer(layer_NODI_32).addTo(map);
 
-        // Controllo Livelli (Tree Control)
+        // Controllo Livelli Completo
         var overlaysTree = [
             {label: '<b>Sfondi</b>', children: [
                 {label: "Rilievo (INGV)", layer: layer_TINItaly_Hillshade_0},
                 {label: "OpenStreetMap", layer: osm}
             ]},
-            {label: '<b>Dati Progetto</b>', children: [
+            {label: '<b>WP1 - Sismica</b>', children: [
                 {label: "NODI", layer: cluster_NODI_32},
-                {label: "Gas Traces", layer: cluster_GasTraces_1}
+                {label: "Stazioni Sismiche WP1", layer: cluster_WP1_SeismicStations_31},
+                {label: "Rete Sismica MOSAICMO", layer: cluster_ReteSismicaMOSAICMO_30},
+            ]},
+            {label: '<b>WP2 - Pozzi e Linee</b>', children: [
+                {label: "Pozzi ViDEPI", layer: cluster_PozziViDEPIAreaMOSAICMO_29},
+                {label: "Linee Sismiche VIDEPI", layer: layer_Lineesismicheacquisiteneititolimineraricessati_VIDEPI_28},
+                {label: "Profili 2D Eni", layer: layer_Profili_2D_Eni_MOSAICMO_27},
+                {label: "Profili Shell", layer: layer_Profili_areaMOSAICMO_SHELL_26},
+            ]},
+            {label: '<b>Geofisica (ERT e MT)</b>', children: [
+                {label: "Magneto Telluric Survey", layer: layer_MagnetoTelluricSurvey_25},
+                {label: "ERT San Massimo 2", layer: layer_ERT_SanMassimo2_17},
+                {label: "ERT San Massimo 1", layer: layer_ERT_SanMassimo1_16},
+                {label: "ERT Centomani", layer: layer_ERT_Centomani_EWq_15},
+                {label: "Fullwaver", layer: layer_Fullwaver_23},
+            ]},
+            {label: '<b>WP4 - Geochimica e Sondaggi</b>', children: [
+                {label: "Gas Traces", layer: cluster_GasTraces_1},
+                {label: "Source Chemistry", layer: cluster_SourceChemistry_2},
+                {label: "Sondaggi Piana Bojano", layer: cluster_SONDAGGI_PIANA_BOJANO_3},
+                {label: "Sondaggio Singolo", layer: cluster_Sondaggio_4},
             ]}
         ];
         
