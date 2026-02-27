@@ -203,7 +203,7 @@
         var layer_Fullwaver = new L.geoJson(json_Fullwaver_23, {
             pointToLayer: function (f, latlng) { 
                 var col = f.properties['FX-TX'] === 'rx' ? '#00f900' : '#ff2600';
-                return L.circleMarker {shape: 'diamond', radius: 8, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); //(latlng, {radius: 5, fillColor: col, color: 'none', fillOpacity: 1}); 
+                return L.circleMarker(latlng, {shape: 'diamond', radius: 8, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); //(latlng, {radius: 5, fillColor: col, color: 'none', fillOpacity: 1}); 
             },
             onEachFeature: function(f,l){ pop_Universal(f,l,'FULLWAVER'); }
         });
