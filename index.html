@@ -167,7 +167,7 @@
         // WP1
         var layer_NODI = new L.geoJson(json_NODI_32, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#a47158', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'NODES'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Seismic Survey Nodes'); }
         });
         var cluster_NODI = new L.MarkerClusterGroup({showCoverageOnHover: false}).addLayer(layer_NODI).addTo(map);
 
