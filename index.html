@@ -90,14 +90,6 @@
         map.on('layeradd layerremove', updatePlacesOpacity);
         updatePlacesOpacity();
 
-        var confini_comunali = L.tileLayer.wms("http://wms.pcn.minambiente.it/ogc?map=/ms_ogc/WMS_v1.3/Vettoriali/Limiti_Amministrativi_Semplificati.map", {
-            layers: 'Comuni', format: 'image/png', transparent: true, attribution: "PCN"
-        });
-        
-        var corsi_acqua = L.tileLayer.wms("http://wms.pcn.minambiente.it/ogc?map=/ms_ogc/WMS_v1.3/Vettoriali/Reticolo_idrografico.map", {
-            layers: 'Reticolo_idrografico', format: 'image/png', transparent: true, pane: 'pane_water', attribution: "PCN"
-        }).addTo(map);
-
         function pop_Universal(feature, layer, title) {
             var content = '<div class="popup-header">' + title + '</div><table>';
             for (var prop in feature.properties) {
@@ -186,10 +178,6 @@
             { label: '<b>Backgrounds</b>', children: [
                 { label: "TinITALY Hillshade (INGV)", layer: hillshade }, 
                 { label: "Populated Places (OSM)", layer: centri_abitati }
-            ]},
-            { label: '<b>Geographic Context</b>', children: [
-                { label: "Municipality Borders", layer: confini_comunali },
-                { label: "Watercourses", layer: corsi_acqua }
             ]},
             { label: '<b>WP1 - Seismic Survey</b>', children: [
                 { label: "Seismic Nodes", layer: cluster_NODI }, 
