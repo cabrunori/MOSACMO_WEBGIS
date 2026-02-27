@@ -158,7 +158,7 @@
         var layer_Sondaggi_Piana = new L.geoJson(json_SONDAGGI_PIANA_BOJANO_3, { onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO PIANA'); } });
         var layer_Sondaggio_4 = new L.geoJson(json_Sondaggio_4, {
             pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'diamond', radius: 10, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO BJ1'); }
         });
 
         // --- MENU LIVELLI AD ALBERO ---
