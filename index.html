@@ -16,15 +16,14 @@
             .leaflet-popup-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
             .leaflet-popup-content th { text-align: left; font-size: 10px; color: #777; text-transform: uppercase; padding: 4px; border-bottom: 1px solid #eee; background: #f9f9f9; width: 40%; }
             .leaflet-popup-content td { font-size: 12px; padding: 4px; border-bottom: 1px solid #eee; color: #333; word-break: break-all; }
-            /* Panes for correct overlay order */
             .leaflet-pane.leaflet-hillshade-pane { z-index: 400; pointer-events: none !important; }
             .leaflet-pane.leaflet-water-pane { z-index: 450; pointer-events: none !important; }
+            .leaflet-pane.leaflet-places-pane { z-index: 410; pointer-events: none !important; }
         </style>
         <title>MOSAICMO WebGIS - Full Data Access</title>
     </head>
     <body>
         <div id="map"></div>
-        
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -70,23 +69,26 @@
         <script>
         var map = L.map('map', {zoomControl:false, maxZoom:28, minZoom:1}).fitBounds([[41.37, 14.26],[41.63, 14.77]]);
 
-        // SFONDI & CONTEXT
+        // CREATE PANES
         map.createPane('pane_hillshade');
+        map.createPane('pane_places');
         map.createPane('pane_water');
-        
+
+        // BACKGROUND LAYERS
         var hillshade = L.tileLayer.wms("https://tinitaly.pi.ingv.it/TINItaly_1_1/wms", {
             layers: 'tinitaly_hshd', format: 'image/png', transparent: true, pane: 'pane_hillshade', identify: false
         }).addTo(map);
 
         var centri_abitati = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: 'OSM', opacity: 0.6
+            attribution: 'OSM', pane: 'pane_places'
         }).addTo(map);
 
-        // Opacity Logic: 100% if hillshade is off, 60% if on
-        map.on('layeradd layerremove', function() {
+        function updatePlacesOpacity() {
             if (map.hasLayer(hillshade)) { centri_abitati.setOpacity(0.6); } 
             else { centri_abitati.setOpacity(1.0); }
-        });
+        }
+        map.on('layeradd layerremove', updatePlacesOpacity);
+        updatePlacesOpacity();
 
         var confini_comunali = L.tileLayer.wms("http://wms.pcn.minambiente.it/ogc?map=/ms_ogc/WMS_v1.3/Vettoriali/Limiti_Amministrativi_Semplificati.map", {
             layers: 'Comuni', format: 'image/png', transparent: true, attribution: "PCN"
@@ -96,7 +98,6 @@
             layers: 'Reticolo_idrografico', format: 'image/png', transparent: true, pane: 'pane_water', attribution: "PCN"
         }).addTo(map);
 
-        // UNIVERSAL POPUP FUNCTION
         function pop_Universal(feature, layer, title) {
             var content = '<div class="popup-header">' + title + '</div><table>';
             for (var prop in feature.properties) {
@@ -113,9 +114,9 @@
             layer.bindPopup(content, {maxHeight: 300, minWidth: 250});
         }
 
-        // --- DATA LAYERS ---
+        // --- LAYER INITIALIZATION ---
 
-        // WP1 - Seismic Survey
+        // WP1
         var layer_NODI = new L.geoJson(json_NODI_32, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#a47158', color: '#222', weight: 1, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'NODES'); }
@@ -132,7 +133,11 @@
             onEachFeature: function(f,l){ pop_Universal(f,l,'Seismic Network'); }
         });
 
-        // WP2 - Wells & 2D
+        // WP2
+        var layer_Sondaggio_BJ1 = new L.geoJson(json_Sondaggio_4, {
+            pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'diamond', radius: 10, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'BJ1 Well'); }
+        });
         var layer_Pozzi = new L.geoJson(json_PozziViDEPIAreaMOSAICMO_29, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 8, fillColor: '#fff', color: '#ff0000', weight: 2, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'VIDEPI Well'); }
@@ -141,11 +146,8 @@
         var layer_Eni = new L.geoJson(json_Profili_2D_Eni_MOSAICMO_27, { style: {color: '#0433ff', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'ENI Seismic Profiles'); } });
         var layer_Shell = new L.geoJson(json_Profili_areaMOSAICMO_SHELL_26, { style: {color: '#e15989', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'SHELL Seismic Profiles'); } });
 
-        // WP3 - Geophysics
-        var layer_MT_Survey = new L.geoJson(json_MagnetoTelluricSurvey_25, {
-            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#fff', color: '#000', weight: 2, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'MT SURVEY'); }
-        });
+        // WP3
+        var layer_MT_Survey = new L.geoJson(json_MagnetoTelluricSurvey_25, { onEachFeature: function(f,l){ pop_Universal(f,l,'MT SURVEY'); } });
         var layer_Fullwaver = new L.geoJson(json_Fullwaver_23, {
             pointToLayer: function (f, latlng) { 
                 var col = f.properties['FX-TX'] === 'rx' ? '#00f900' : '#ff2600';
@@ -153,19 +155,33 @@
             },
             onEachFeature: function(f,l){ pop_Universal(f,l,'FULLWAVER'); }
         });
+        var layer_ERT_Linee = new L.featureGroup([
+            new L.geoJson(json_ERT_SanMassimo2_lin_22, {style:{color:'#000'}, onEachFeature: function(f,l){ pop_Universal(f,l,'ERT Line'); }}),
+            new L.geoJson(json_ERT_SanMassimo1_lin_21), new L.geoJson(json_ERT_SanMassimoScarp_lin_20), 
+            new L.geoJson(json_ERT_Campochiaro_q_lin_19), new L.geoJson(json_ERT_Centomani_EWq_lin_18)
+        ]);
+        var layer_ERT_Punti = new L.featureGroup([
+            new L.geoJson(json_ERT_SanMassimo2_17, {onEachFeature: function(f,l){ pop_Universal(f,l,'ERT Point'); }}),
+            new L.geoJson(json_ERT_SanMassimo1_16), new L.geoJson(json_ERT_Centomani_EWq_15), 
+            new L.geoJson(json_ERT_Campochiaro_q_14), new L.geoJson(json_ERT_SanMassimo_scarp_13), 
+            new L.geoJson(json_polo_remoto_ERT_Campochiaro_q_12)
+        ]);
 
-        // WP4 - Geochemistry
+        // WP4 - Geochemistry (Requested code block)
         var layer_Gas = new L.geoJson(json_GasTraces_1, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#e5b636', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'Gas Traces Survey'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Gas Traces Surveys'); }
         });
-        var layer_Sondaggio_BJ1 = new L.geoJson(json_Sondaggio_4, {
-            pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'diamond', radius: 10, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'BJ1 Well'); }
+        var layer_Chemistry = new L.geoJson(json_SourceChemistry_2, {
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#be7158', color: '#222', weight: 1, fillOpacity: 1}); },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Chemistry syrveys'); }
+        });
+        var layer_Sondaggi_Piana = new L.geoJson(json_SONDAGGI_PIANA_BOJANO_3, {
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 5, fillColor: '#3374f3', color: '#222', weight: 1, fillOpacity: 1}); },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Valley Surveys'); }
         });
 
-        // LAYER TREE
-        var baseMaps = { "OpenStreetMap": centri_abitati, "INGV TinITALY Hillshade": hillshade };
+        // MENU TREE
         var overlaysTree = [
             { label: '<b>Backgrounds</b>', children: [
                 { label: "TinITALY Hillshade (INGV)", layer: hillshade }, 
@@ -181,6 +197,7 @@
                 { label: "MOSAICMO Network", layer: layer_Rete_Sismica }
             ]},
             { label: '<b>WP2 - Wells and 2D Survey</b>', children: [
+                { label: "BJ1 Well", layer: layer_Sondaggio_BJ1 }, 
                 { label: "ViDEPI Wells", layer: layer_Pozzi }, 
                 { label: "VIDEPI Lines", layer: layer_Linee_VIDEPI }, 
                 { label: "Eni Profiles", layer: layer_Eni }, 
@@ -188,11 +205,14 @@
             ]},
             { label: '<b>WP3 - Geophysics</b>', children: [
                 { label: "MT Survey", layer: layer_MT_Survey }, 
-                { label: "Fullwaver", layer: layer_Fullwaver }
+                { label: "Fullwaver", layer: layer_Fullwaver },
+                { label: "ERT Lines", layer: layer_ERT_Linee },
+                { label: "ERT Nodes", layer: layer_ERT_Punti }
             ]},
             { label: '<b>WP4 - Geochemistry</b>', children: [
-                { label: "Gas Traces", layer: layer_Gas }, 
-                { label: "BJ1 Well", layer: layer_Sondaggio_BJ1 }
+                { label: "Gas Traces Surveys", layer: layer_Gas }, 
+                { label: "Chemistry syrveys", layer: layer_Chemistry }, 
+                { label: "Valley Surveys", layer: layer_Sondaggi_Piana }
             ]}
         ];
 
