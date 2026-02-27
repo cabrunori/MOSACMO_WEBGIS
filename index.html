@@ -76,7 +76,29 @@
         var hillshade = L.tileLayer.wms("https://tinitaly.pi.ingv.it/TINItaly_1_1/wms", {
             layers: 'tinitaly_hshd', format: 'image/png', transparent: true, pane: 'pane_hillshade', identify: false
         }).addTo(map);
+        // --- LAYER GEOGRAFICI DI CONTESTO (WMS PCN/ISTAT) ---
+        
+        // Confini Comunali
+        var confini_comunali = L.tileLayer.wms("http://wms.pcn.minambiente.it/ogc?map=/ms_ogc/WMS_v1.3/Vettoriali/Limiti_Amministrativi_Semplificati.map", {
+            layers: 'Comuni',
+            format: 'image/png',
+            transparent: true,
+            attribution: "PCN - Min. Ambiente"
+        });
+        
+        // Corsi d'acqua (Reticolo idrografico)
+        var corsi_acqua = L.tileLayer.wms("http://wms.pcn.minambiente.it/ogc?map=/ms_ogc/WMS_v1.3/Vettoriali/Reticolo_idrografico.map", {
+            layers: 'Reticolo_idrografico',
+            format: 'image/png',
+            transparent: true,
+            attribution: "PCN"
+        });
 
+// Centri Abitati (Livello informativo dai servizi ISTAT o OpenStreetMap)
+var centri_abitati = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    opacity: 0.6, // Leggermente trasparente per non coprire i dati sismici
+    attribution: 'OSM'
+});
         // FUNZIONE POPUP UNIVERSALE: Cliccabilità Link e Pulizia
         function pop_Universal(feature, layer, title) {
             var content = '<div class="popup-header">' + title + '</div><table>';
