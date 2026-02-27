@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,17 +11,19 @@
         <link rel="stylesheet" href="css/MarkerCluster.css">
         <link rel="stylesheet" href="css/MarkerCluster.Default.css">
         <style>
-        html, body, #map { width: 100%; height: 100%; padding: 0; margin: 0; background: #fff; }
-        .popup-header { background: #2c3e50; color: white; margin: -14px -14px 10px -14px; padding: 10px; border-radius: 4px 4px 0 0; font-weight: bold; text-align: center; font-size: 13px; }
-        .leaflet-popup-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .leaflet-popup-content th { text-align: left; font-size: 10px; color: #777; text-transform: uppercase; padding: 4px; border-bottom: 1px solid #eee; background: #f9f9f9; width: 40%; }
-        .leaflet-popup-content td { font-size: 12px; padding: 4px; border-bottom: 1px solid #eee; color: #333; }
-        .leaflet-pane.leaflet-hillshade-pane { pointer-events: none !important; }
+            html, body, #map { width: 100%; height: 100%; padding: 0; margin: 0; background: #fff; }
+            .popup-header { background: #2c3e50; color: white; margin: -14px -14px 10px -14px; padding: 10px; border-radius: 4px 4px 0 0; font-weight: bold; text-align: center; font-size: 13px; }
+            .leaflet-popup-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+            .leaflet-popup-content th { text-align: left; font-size: 10px; color: #777; text-transform: uppercase; padding: 4px; border-bottom: 1px solid #eee; background: #f9f9f9; width: 40%; }
+            .leaflet-popup-content td { font-size: 12px; padding: 4px; border-bottom: 1px solid #eee; color: #333; word-break: break-all; }
+            /* Rende lo sfondo hillshade passante per i click */
+            .leaflet-pane.leaflet-hillshade-pane { pointer-events: none !important; }
         </style>
-        <title>MOSAICMO WebGIS - Full Layers Version</title>
+        <title>MOSAICMO WebGIS - Full Data Access</title>
     </head>
     <body>
         <div id="map"></div>
+        
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -67,7 +69,7 @@
         <script>
         var map = L.map('map', {zoomControl:false, maxZoom:28, minZoom:1}).fitBounds([[41.37, 14.26],[41.63, 14.77]]);
 
-        // SFONDI (Correzione per rendere le linee interrogabili)
+        // SFONDI
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: 'OSM'});
         map.createPane('pane_hillshade');
         map.getPane('pane_hillshade').style.zIndex = 400;
@@ -75,16 +77,15 @@
             layers: 'tinitaly_hshd', format: 'image/png', transparent: true, pane: 'pane_hillshade', identify: false
         }).addTo(map);
 
-        // FUNZIONE POPUP UNIVERSALE CON LINK ATTIVI
+        // FUNZIONE POPUP UNIVERSALE: Cliccabilità Link e Pulizia
         function pop_Universal(feature, layer, title) {
             var content = '<div class="popup-header">' + title + '</div><table>';
             for (var prop in feature.properties) {
                 var val = feature.properties[prop];
                 if (val !== null && prop !== 'fid') {
-                    // Controllo se il valore è un link
                     var displayVal = val;
-                    if (typeof val === 'string' && val.startsWith('http')) {
-                        displayVal = '<a href="' + val + '" target="_blank">Apri Documento</a>';
+                    if (typeof val === 'string' && (val.startsWith('http') || val.includes('www.'))) {
+                        displayVal = '<a href="' + val + '" target="_blank" style="color:blue; font-weight:bold;">Apri Link/Doc</a>';
                     }
                     content += '<tr><th>' + prop + '</th><td>' + displayVal + '</td></tr>';
                 }
@@ -92,18 +93,19 @@
             content += '</table>';
             layer.bindPopup(content, {maxHeight: 300, minWidth: 250});
         }
-        // --- DEFINIZIONE LAYER (32 TOTALI) ---
+
+        // --- INIZIALIZZAZIONE TUTTI I 32 LAYER ---
 
         // WP1 - Reti Sismiche
         var layer_NODI = new L.geoJson(json_NODI_32, {
-            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6.0, fillColor: 'rgba(164,113,88,1.0)', color: '#222', weight: 1, fillOpacity: 1}); },
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#a47158', color: '#222', weight: 1, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'NODI'); }
         }).addTo(map);
         var cluster_NODI = new L.MarkerClusterGroup({showCoverageOnHover: false}).addLayer(layer_NODI);
 
-        var layer_Seismic_WP1 = new L.geoJson(json_WP1_SeismicStations_31, {
+        var layer_Seismic_Stations = new L.geoJson(json_WP1_SeismicStations_31, {
             pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'triangle', radius: 6, fillColor: '#e23838', color: '#000', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'STAZIONI WP1'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'STAZIONE WP1'); }
         });
         
         var layer_Rete_Sismica = new L.geoJson(json_ReteSismicaMOSAICMO_30, {
@@ -113,88 +115,80 @@
 
         // WP2 - Pozzi e Sismica 2D
         var layer_Pozzi = new L.geoJson(json_PozziViDEPIAreaMOSAICMO_29, {
-            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 8.0, fillColor: '#fff', color: '#ff0000', weight: 3, fillOpacity: 1}); },
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 8, fillColor: '#fff', color: '#ff0000', weight: 2, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'POZZO VIDEPI'); }
         });
-        var layer_Linee_VIDEPI = new L.geoJson(json_Lineesismicheacquisiteneititolimineraricessati_VIDEPI_28, { style: {color: '#333', weight: 2}, onEachFeature: function(f,l){ pop_Universal(f,l,'LINEE VIDEPI'); } });
+        var layer_Linee_VIDEPI = new L.geoJson(json_Lineesismicheacquisiteneititolimineraricessati_VIDEPI_28, { style: {color: '#000', weight: 3}, onEachFeature: function(f,l){ pop_Universal(f,l,'LINEA VIDEPI'); } });
         var layer_Eni = new L.geoJson(json_Profili_2D_Eni_MOSAICMO_27, { style: {color: '#0433ff', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'PROFILO ENI'); } });
         var layer_Shell = new L.geoJson(json_Profili_areaMOSAICMO_SHELL_26, { style: {color: '#e15989', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'PROFILO SHELL'); } });
 
-        // WP3 - Geofisica (ERT e MT)
-        var layer_MT_Survey = new L.geoJson(json_MagnetoTelluricSurvey_25, { onEachFeature: function(f,l){ pop_Universal(f,l,'MT SURVEY'); } });
+        // WP3 - Geofisica
+        var layer_MT_Survey = new L.geoJson(json_MagnetoTelluricSurvey_25, {
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#fff', color: '#000', weight: 2, fillOpacity: 1}); },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'MT SURVEY'); }
+        });
         var layer_MT_Area = new L.geoJson(json_MagnetoTelluricSurveyArea_24, { style: {fillColor: '#85b66f', fillOpacity: 0.4, color: '#444', weight: 1} });
-        var layer_Fullwaver = new L.geoJson(json_Fullwaver_23, { onEachFeature: function(f,l){ pop_Universal(f,l,'FULLWAVER'); } });
-        
+        var layer_Fullwaver = new L.geoJson(json_Fullwaver_23, {
+            pointToLayer: function (f, latlng) { 
+                var col = f.properties['FX-TX'] === 'rx' ? '#00f900' : '#ff2600';
+                return L.circleMarker(latlng, {radius: 5, fillColor: col, color: 'none', fillOpacity: 1}); 
+            },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'FULLWAVER'); }
+        });
+
+        // ERT Linee e Punti
         var layer_ERT_Linee = new L.featureGroup([
-            new L.geoJson(json_ERT_SanMassimo2_lin_22, {style:{color:'#000'}, onEachFeature: function(f,l){ pop_Universal(f,l,'ERT LINEA'); }}),
-            new L.geoJson(json_ERT_SanMassimo1_lin_21, {style:{color:'#000'}}),
-            new L.geoJson(json_ERT_SanMassimoScarp_lin_20, {style:{color:'#000'}}),
-            new L.geoJson(json_ERT_Campochiaro_q_lin_19, {style:{color:'#000'}}),
-            new L.geoJson(json_ERT_Centomani_EWq_lin_18, {style:{color:'#000'}})
+            new L.geoJson(json_ERT_SanMassimo2_lin_22, {style:{color:'#000', weight:3}, onEachFeature: function(f,l){ pop_Universal(f,l,'LINEA ERT'); }}),
+            new L.geoJson(json_ERT_SanMassimo1_lin_21, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_ERT_SanMassimoScarp_lin_20, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_ERT_Campochiaro_q_lin_19, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_ERT_Centomani_EWq_lin_18, {style:{color:'#000', weight:3}})
         ]);
-
         var layer_ERT_Punti = new L.featureGroup([
-            new L.geoJson(json_ERT_SanMassimo2_17, {onEachFeature: function(f,l){ pop_Universal(f,l,'ERT PUNTO'); }}),
-            new L.geoJson(json_ERT_SanMassimo1_16),
-            new L.geoJson(json_ERT_Centomani_EWq_15),
-            new L.geoJson(json_ERT_Campochiaro_q_14),
-            new L.geoJson(json_ERT_SanMassimo_scarp_13),
-            new L.geoJson(json_polo_remoto_ERT_Campochiaro_q_12)
+            new L.geoJson(json_ERT_SanMassimo2_17, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#becf50', color:'#333', weight:1, fillOpacity:1})}, onEachFeature: function(f,l){ pop_Universal(f,l,'PUNTO ERT'); }}),
+            new L.geoJson(json_ERT_SanMassimo1_16, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#e5b636', color:'#333', weight:1, fillOpacity:1})}}),
+            new L.geoJson(json_ERT_Centomani_EWq_15, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#7d8b8f', color:'#333', weight:1, fillOpacity:1})}}),
+            new L.geoJson(json_ERT_Campochiaro_q_14, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#a47158', color:'#333', weight:1, fillOpacity:1})}}),
+            new L.geoJson(json_ERT_SanMassimo_scarp_13, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#be7158', color:'#333', weight:1, fillOpacity:1})}}),
+            new L.geoJson(json_polo_remoto_ERT_Campochiaro_q_12, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#e77148', color:'#333', weight:1, fillOpacity:1})}})
         ]);
 
+        // Sismica Attiva
         var layer_Sismica_Attiva = new L.featureGroup([
-            new L.geoJson(json_SanMassimoLinea2_11, {style:{color:'#ff7800'}, onEachFeature: function(f,l){ pop_Universal(f,l,'SISMICA ATTIVA'); }}),
-            new L.geoJson(json_Campochiaro_linea3_10),
-            new L.geoJson(json_Boiano_Linea1_9),
-            new L.geoJson(json_SismicaEWline_8),
-            new L.geoJson(json_SismicaNSline_7),
-            new L.geoJson(json_sismica_Bojano_EW_geofoni_6),
-            new L.geoJson(json_sismica_Bojano_NS_geofoni_5)
+            new L.geoJson(json_SanMassimoLinea2_11, {style:{color:'#000', weight:3}, onEachFeature: function(f,l){ pop_Universal(f,l,'SISMICA ATTIVA'); }}),
+            new L.geoJson(json_Campochiaro_linea3_10, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_Boiano_Linea1_9, {style:{color:'#000', weight:6}}),
+            new L.geoJson(json_SismicaEWline_8, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_SismicaNSline_7, {style:{color:'#000', weight:3}}),
+            new L.geoJson(json_sismica_Bojano_EW_geofoni_6, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#7d8b8f'})}}),
+            new L.geoJson(json_sismica_Bojano_NS_geofoni_5, {pointToLayer: function(f,p){return L.circleMarker(p,{radius:4, fillColor:'#be7158'})}})
         ]);
 
-        // WP4 - Geochimica e Sondaggi
+        // WP4 - Geochimica
         var layer_Gas = new L.geoJson(json_GasTraces_1, {
-            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4.0, fillColor: 'rgba(229,182,54,1.0)', color: '#333', weight: 1, fillOpacity: 1}); },
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#e5b636', color: '#222', weight: 1, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'GAS TRACES'); }
         });
         var layer_Chemistry = new L.geoJson(json_SourceChemistry_2, {
-            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 5, fillColor: '#be7158', color: '#000', weight: 1, fillOpacity: 1}); },
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#be7158', color: '#222', weight: 1, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'CHEMISTRY'); }
         });
-        var layer_Sondaggi_Piana = new L.geoJson(json_SONDAGGI_PIANA_BOJANO_3, { onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO PIANA'); } });
-        var layer_Sondaggio_4 = new L.geoJson(json_Sondaggio_4, {
+        var layer_Sondaggi_Piana = new L.geoJson(json_SONDAGGI_PIANA_BOJANO_3, {
+            pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 5, fillColor: '#3374f3', color: '#222', weight: 1, fillOpacity: 1}); },
+            onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO PIANA'); }
+        });
+        var layer_Sondaggio_BJ1 = new L.geoJson(json_Sondaggio_4, {
             pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'diamond', radius: 10, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO BJ1'); }
         });
 
-        // --- MENU LIVELLI AD ALBERO ---
-        var baseMaps = { "OpenStreetMap": osm, "Rilievo (INGV)": hillshade };
-
+        // MENU LIVELLI
+        var baseMaps = { "OpenStreetMap": osm, "Rilievo INGV": hillshade };
         var overlaysTree = [
-            { label: '<b>WP1 - Reti Sismiche</b>', children: [
-                { label: "Nodi Sismici", layer: cluster_NODI },
-                { label: "Stazioni Seismic WP1", layer: layer_Seismic_WP1 },
-                { label: "Rete MOSAICMO", layer: layer_Rete_Sismica }
-            ]},
-            { label: '<b>WP2 - Pozzi e Sismica 2D</b>', children: [
-                { label: "Pozzi ViDEPI", layer: layer_Pozzi },
-                { label: "Linee VIDEPI", layer: layer_Linee_VIDEPI },
-                { label: "Profili Eni", layer: layer_Eni },
-                { label: "Profili Shell", layer: layer_Shell }
-            ]},
-            { label: '<b>WP3 - Geofisica</b>', children: [
-                { label: "MT Survey & Area", layer: layer_MT_Survey },
-                { label: "Fullwaver", layer: layer_Fullwaver },
-                { label: "ERT Punti", layer: layer_ERT_Punti },
-                { label: "ERT Linee", layer: layer_ERT_Linee },
-                { label: "Sismica Attiva", layer: layer_Sismica_Attiva }
-            ]},
-            { label: '<b>WP4 - Geochimica e Sondaggi</b>', children: [
-                { label: "Gas Traces", layer: layer_Gas },
-                { label: "Source Chemistry", layer: layer_Chemistry },
-                { label: "Sondaggi Piana", layer: layer_Sondaggi_Piana },
-                { label: "Sondaggio Bojano", layer: layer_Sondaggio_4 }
-            ]}
+            { label: '<b>WP1 - Sismica</b>', children: [{ label: "Nodi Sismici", layer: cluster_NODI }, { label: "Stazioni Seismic WP1", layer: layer_Seismic_Stations }, { label: "Rete MOSAICMO", layer: layer_Rete_Sismica }]},
+            { label: '<b>WP2 - Pozzi e 2D</b>', children: [{ label: "Pozzi ViDEPI", layer: layer_Pozzi }, { label: "Linee VIDEPI", layer: layer_Linee_VIDEPI }, { label: "Profili Eni", layer: layer_Eni }, { label: "Profili Shell", layer: layer_Shell }]},
+            { label: '<b>WP3 - Geofisica</b>', children: [{ label: "MT Survey & Area", layer: layer_MT_Survey }, { label: "Fullwaver", layer: layer_Fullwaver }, { label: "ERT Linee", layer: layer_ERT_Linee }, { label: "ERT Punti", layer: layer_ERT_Punti }, { label: "Sismica Attiva", layer: layer_Sismica_Attiva }]},
+            { label: '<b>WP4 - Geochimica</b>', children: [{ label: "Gas Traces", layer: layer_Gas }, { label: "Chemistry", layer: layer_Chemistry }, { label: "Sondaggi Piana", layer: layer_Sondaggi_Piana }, { label: "Sondaggio BJ1", layer: layer_Sondaggio_BJ1 }]}
         ];
 
         L.control.layers.tree(baseMaps, overlaysTree, {collapsed: false}).addTo(map);
