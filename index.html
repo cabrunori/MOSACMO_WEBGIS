@@ -210,6 +210,17 @@ var centri_abitati = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}
         // MENU LIVELLI
         var baseMaps = { "OpenStreetMap": osm, "Rilievo INGV": hillshade };
         var overlaysTree = [
+            { label: '<b>Sfondi</b>', children: [
+                { label: "Rilievo (INGV)", layer: hillshade }, 
+                { label: "OpenStreetMap", layer: osm }
+            ]},
+            { label: '<b>Inquadramento Geografico</b>', children: [
+                { label: "Confini Comunali", layer: confini_comunali },
+                { label: "Corsi d'Acqua", layer: corsi_acqua },
+                { label: "Toponomastica/Centri", layer: centri_abitati }
+            ]},
+            // MOSAICMO LEVELS
+         
             { label: '<b>WP1 - Seismic Survey</b>', children: [{ label: "Seismic Nodes", layer: cluster_NODI }, { label: "Seismic Stations WP1", layer: layer_Seismic_Stations }, { label: "MOSAICMO Network", layer: layer_Rete_Sismica }]},
             { label: '<b>WP2 - Wells and 2D survey</b>', children: [{ label: "ViDEPI Wells ", layer: layer_Pozzi }, { label: "VIDEPI Lines", layer: layer_Linee_VIDEPI }, { label: "Eni Profiles", layer: layer_Eni }, { label: "Shell Profiles", layer: layer_Shell }]},
             { label: '<b>WP3 - Geophysics</b>', children: [{ label: "MT Survey & Area", layer: layer_MT_Survey }, { label: "Fullwaver", layer: layer_Fullwaver }, { label: "ERT Lines", layer: layer_ERT_Linee }, { label: "ERT Nodes", layer: layer_ERT_Punti }, { label: "Active Seismic Surveys", layer: layer_Sismica_Attiva }]},
