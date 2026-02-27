@@ -100,7 +100,7 @@
         // 1. Definisci il layer SENZA aggiungerlo alla mappa (.addTo(map) rimosso)
         var layer_NODI = new L.geoJson(json_NODI_32, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 6, fillColor: '#a47158', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'NODI'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'NODES'); }
         });
 
         // 2. Crea il cluster e aggiungi il layer al cluster
