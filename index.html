@@ -16,6 +16,7 @@
         .leaflet-popup-content table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         .leaflet-popup-content th { text-align: left; font-size: 10px; color: #777; text-transform: uppercase; padding: 4px; border-bottom: 1px solid #eee; background: #f9f9f9; width: 40%; }
         .leaflet-popup-content td { font-size: 12px; padding: 4px; border-bottom: 1px solid #eee; color: #333; }
+        .leaflet-pane.leaflet-hillshade-pane { pointer-events: none !important; }
         </style>
         <title>MOSAICMO WebGIS - Full Layers Version</title>
     </head>
@@ -74,18 +75,23 @@
             layers: 'tinitaly_hshd', format: 'image/png', transparent: true, pane: 'pane_hillshade', identify: false
         }).addTo(map);
 
-        // FUNZIONE POPUP UNIVERSALE
+        // FUNZIONE POPUP UNIVERSALE CON LINK ATTIVI
         function pop_Universal(feature, layer, title) {
             var content = '<div class="popup-header">' + title + '</div><table>';
             for (var prop in feature.properties) {
-                if (feature.properties[prop] !== null && prop !== 'fid') {
-                    content += '<tr><th>' + prop + '</th><td>' + feature.properties[prop] + '</td></tr>';
+                var val = feature.properties[prop];
+                if (val !== null && prop !== 'fid') {
+                    // Controllo se il valore è un link
+                    var displayVal = val;
+                    if (typeof val === 'string' && val.startsWith('http')) {
+                        displayVal = '<a href="' + val + '" target="_blank">Apri Documento</a>';
+                    }
+                    content += '<tr><th>' + prop + '</th><td>' + displayVal + '</td></tr>';
                 }
             }
             content += '</table>';
-            layer.bindPopup(content, {maxHeight: 300, minWidth: 220});
+            layer.bindPopup(content, {maxHeight: 300, minWidth: 250});
         }
-
         // --- DEFINIZIONE LAYER (32 TOTALI) ---
 
         // WP1 - Reti Sismiche
