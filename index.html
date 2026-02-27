@@ -121,9 +121,9 @@
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 8, fillColor: '#fff', color: '#ff0000', weight: 2, fillOpacity: 1}); },
             onEachFeature: function(f,l){ pop_Universal(f,l,'POZZO VIDEPI'); }
         });
-        var layer_Linee_VIDEPI = new L.geoJson(json_Lineesismicheacquisiteneititolimineraricessati_VIDEPI_28, { style: {color: '#000', weight: 3}, onEachFeature: function(f,l){ pop_Universal(f,l,'LINEA VIDEPI'); } });
-        var layer_Eni = new L.geoJson(json_Profili_2D_Eni_MOSAICMO_27, { style: {color: '#0433ff', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'PROFILO ENI'); } });
-        var layer_Shell = new L.geoJson(json_Profili_areaMOSAICMO_SHELL_26, { style: {color: '#e15989', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'PROFILO SHELL'); } });
+        var layer_Linee_VIDEPI = new L.geoJson(json_Lineesismicheacquisiteneititolimineraricessati_VIDEPI_28, { style: {color: '#000', weight: 3}, onEachFeature: function(f,l){ pop_Universal(f,l,'VIDEPI line'); } });
+        var layer_Eni = new L.geoJson(json_Profili_2D_Eni_MOSAICMO_27, { style: {color: '#0433ff', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'ENI SeisimicProfiles'); } });
+        var layer_Shell = new L.geoJson(json_Profili_areaMOSAICMO_SHELL_26, { style: {color: '#e15989', weight: 4}, onEachFeature: function(f,l){ pop_Universal(f,l,'SHELL Seismic Profiles'); } });
 
         // WP3 - Geofisica
         var layer_MT_Survey = new L.geoJson(json_MagnetoTelluricSurvey_25, {
@@ -170,28 +170,28 @@
         // WP4 - Geochimica
         var layer_Gas = new L.geoJson(json_GasTraces_1, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#e5b636', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'GAS TRACES'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Gas Traces Surveys'); }
         });
         var layer_Chemistry = new L.geoJson(json_SourceChemistry_2, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 4, fillColor: '#be7158', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'CHEMISTRY'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Chemistry syrveys'); }
         });
         var layer_Sondaggi_Piana = new L.geoJson(json_SONDAGGI_PIANA_BOJANO_3, {
             pointToLayer: function (f, latlng) { return L.circleMarker(latlng, {radius: 5, fillColor: '#3374f3', color: '#222', weight: 1, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO PIANA'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'Valley Surveys'); }
         });
         var layer_Sondaggio_BJ1 = new L.geoJson(json_Sondaggio_4, {
             pointToLayer: function (f, latlng) { return L.shapeMarker(latlng, {shape: 'diamond', radius: 10, fillColor: '#fa8b39', color: '#fff', weight: 2, fillOpacity: 1}); },
-            onEachFeature: function(f,l){ pop_Universal(f,l,'SONDAGGIO BJ1'); }
+            onEachFeature: function(f,l){ pop_Universal(f,l,'BJ1 Well'); }
         });
 
         // MENU LIVELLI
         var baseMaps = { "OpenStreetMap": osm, "Rilievo INGV": hillshade };
         var overlaysTree = [
-            { label: '<b>WP1 - Sismica</b>', children: [{ label: "Seismic Nodes", layer: cluster_NODI }, { label: "Stazioni Seismic WP1", layer: layer_Seismic_Stations }, { label: "Rete MOSAICMO", layer: layer_Rete_Sismica }]},
-            { label: '<b>WP2 - Pozzi e 2D</b>', children: [{ label: "Pozzi ViDEPI", layer: layer_Pozzi }, { label: "Linee VIDEPI", layer: layer_Linee_VIDEPI }, { label: "Profili Eni", layer: layer_Eni }, { label: "Profili Shell", layer: layer_Shell }]},
-            { label: '<b>WP3 - Geofisica</b>', children: [{ label: "MT Survey & Area", layer: layer_MT_Survey }, { label: "Fullwaver", layer: layer_Fullwaver }, { label: "ERT Linee", layer: layer_ERT_Linee }, { label: "ERT Punti", layer: layer_ERT_Punti }, { label: "Sismica Attiva", layer: layer_Sismica_Attiva }]},
-            { label: '<b>WP4 - Geochimica</b>', children: [{ label: "Gas Traces", layer: layer_Gas }, { label: "Chemistry", layer: layer_Chemistry }, { label: "Sondaggi Piana", layer: layer_Sondaggi_Piana }, { label: "Sondaggio BJ1", layer: layer_Sondaggio_BJ1 }]}
+            { label: '<b>WP1 - Sismica</b>', children: [{ label: "Seismic Nodes", layer: cluster_NODI }, { label: "Seismic Stations WP1", layer: layer_Seismic_Stations }, { label: "MOSAICMO Network", layer: layer_Rete_Sismica }]},
+            { label: '<b>WP2 - Pozzi e 2D</b>', children: [{ label: "ViDEPI Wells ", layer: layer_Pozzi }, { label: "Linee VIDEPI", layer: layer_Linee_VIDEPI }, { label: "Profili Eni", layer: layer_Eni }, { label: "Profili Shell", layer: layer_Shell }]},
+            { label: '<b>WP3 - Geofisica</b>', children: [{ label: "MT Survey & Area", layer: layer_MT_Survey }, { label: "Fullwaver", layer: layer_Fullwaver }, { label: "ERT Linee", layer: layer_ERT_Linee }, { label: "ERT Punti", layer: layer_ERT_Punti }, { label: "Active Seismic Surveys", layer: layer_Sismica_Attiva }]},
+            { label: '<b>WP4 - Geochimica</b>', children: [{ label: "Gas Traces", layer: layer_Gas }, { label: "Chemistry", layer: layer_Chemistry }, { label: "Valley Surveys", layer: layer_Sondaggi_Piana }, { label: "BJ1 Well", layer: layer_Sondaggio_BJ1 }]}
         ];
 
         L.control.layers.tree(baseMaps, overlaysTree, {collapsed: false}).addTo(map);
